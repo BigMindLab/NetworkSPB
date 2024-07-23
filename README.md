@@ -12,7 +12,7 @@ This project includes scripts to generate network plots of researchers' areas of
 Clone the repository:
 
 ```sh
-git clone https://github.com/DanielGarbozo/cnetplotSPB.git
+git clone https://github.com/BigMindLab/NetworkSPBBC.git
 cd 'directory'
 ```
 
