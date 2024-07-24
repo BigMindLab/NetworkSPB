@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="https://scontent.flim15-1.fna.fbcdn.net/v/t1.6435-9/167733528_133901418739618_7233742468266903680_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFTV-vMvTY9_OrchpstirWDKuncwP7t7IUq6dzA_u3shRVNbgm-tH5JAggg6yXVJgZNpLdnaa0kUPh1gX7WPCsx&_nc_ohc=AY61jX0QTsUQ7kNvgFlsAV4&_nc_ht=scontent.flim15-1.fna&oh=00_AYBUAMb28efXVSSUWydwEbAX5NaHr5cQCjMM32NWBRwKmQ&oe=66C2621B" type="image/x-icon">
+    <title>SPB Author Network</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            background: radial-gradient(circle at 24.1% 68.8%, #190750 0%, #37182f 99.4%);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .a_title {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: inherit;
+        }
+        .node {
+            stroke-width: 1.5px;
+            fill: #dfdfdf;
+        }
+        .author-node {
+            fill: rgb(99, 0, 212);
+            stroke-width: 5px;
+        }
+        .label {
+            fill: #fff;
+            text-shadow: 0 0 30px #000;
+        }
+        .link {
+            stroke: #848484;
+            stroke-opacity: 0.6;
+        }
+        .highlight {
+            stroke: #f00;
+            stroke-width: 10px;
+        }
+        .highlight-node {
+            fill: #f00;
+        }
+        .header {
+            /* height: 100px; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+        }
+        .header-inner {
+            /* margin-left: 6vw; */
+            width: 70em;
+            max-width: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 10vh;
+        }
+        .header span {
+            /* width: auto; */
+            font-size: clamp(1.6em, 3.5vh, 1.9em);
+            font-weight: bold;
+            text-align: center;
+            max-width: 32em;
+        }
+        #mainNetwork {
+            margin: 10px;
+            width: 55vw;
+            height: 80vh;
+        }
+        .SPBPhoto {
+            border-radius: 50% 50% 50% 50%;
+            border-collapse: collapse;
+            max-width: 1080px;
+            height: 100%;
+            object-fit: contain;
+        }
+        .containerPhoto {
+            left: 55%;
+            top: 12%;
+            /* position: absolute; */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .authorInfo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 43vw;
+            padding: 10px;
+            overflow-y: visible;
+        }
+
+        .box-p {
+            position: relative;
+            border-radius: 20px;
+            background: linear-gradient(0deg, #000, #262626);
+            font-size: 1.1em;
+        }
+
+        .national .box-p::before,
+        .national .box-p::after {
+            content: '';
+            border-radius: 20px;
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background: linear-gradient(60deg, rgba(255,255,255,1) 0%, rgba(245,0,0,1) 13%, rgba(0,0,0,1) 50%, rgba(255,0,0,1) 80%, rgba(255,255,255,1) 100%);
+            background-size: 400%;
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            z-index: -1;
+            animation: animate 20s linear infinite;
+        }
+        
+        .international .box-p::before,
+        .international .box-p::after {
+            content: '';
+            border-radius: 20px;
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background: linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 1) 0%,
+            rgba(255, 154, 0, 1) 10%,
+            rgba(208, 222, 33, 1) 20%,
+            rgba(79, 220, 74, 1) 30%,
+            rgba(63, 218, 216, 1) 40%,
+            rgba(47, 201, 226, 1) 50%,
+            rgba(28, 127, 238, 1) 60%,
+            rgba(95, 21, 242, 1) 70%,
+            rgba(186, 12, 248, 1) 80%,
+            rgba(251, 7, 217, 1) 90%,
+            rgba(255, 0, 0, 1) 100%
+            );
+            background-size: 400%;
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            z-index: -1;
+            animation: animate 20s linear infinite;
+        }
+        
+        .box-p::after {
+            filter: blur(15px);
+        }
+
+        
+        @keyframes animate {
+            0% {
+                background-position: 0 0;
+
+            }
+            50% {
+                background-position: 400% 0;
+            }
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        .authorInfo p {
+            /* z-index: 0; */
+            font-size: 1.5vw;
+            font-weight: bold;
+            /* center text */
+            text-align: center;
+            margin: 0.5em;
+
+        }
+        
+        .authorPhotos {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow-y: hidden;
+            padding-top: 20px;
+        }
+        .container {
+            margin: 0.5vw;
+            width: 3.5vw;
+            height: 3.5vw;
+        }
+        
+        .box {
+            border-radius: 50%;
+            position: relative;
+            height: inherit;
+            width: inherit;
+            margin: 0 auto;
+            background-color: #8c0000;
+            flex: 1;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .box:hover {
+            box-shadow: rgba(240, 46, 170, 0.4) 5px 5px, rgba(240, 46, 170, 0.3) 10px 10px, rgba(240, 46, 170, 0.2) 15px 15px, rgba(240, 46, 170, 0.1) 20px 20px, rgba(240, 46, 170, 0.05) 25px 25px;
+        }
+
+        .box:hover .Inside {
+            display: block;
+        }
+        
+        .Inside {
+            position: relative;
+            height: inherit;
+            width: inherit;
+        }
+
+        .wrapper {
+            height: inherit;
+            width: inherit;
+        }
+        
+        .photo {
+            border-radius: 50%;
+            display: block;
+            height: inherit;
+            width: inherit;
+            margin: 0 auto;
+            cursor: pointer;
+            /* width: inherit;
+            height: inherit; */
+            object-fit: cover;
+        }
+
+        .photo.highlight {
+            /* margin: -10px; */
+            box-shadow: rgba(240, 46, 46, 0.4) 5px 5px, rgba(240, 46, 46, 0.3) 10px 10px, rgba(240, 46, 46, 0.2) 15px 15px, rgba(240, 46, 170, 0.1) 20px 20px, rgba(240, 46, 170, 0.05) 25px 25px;
+        }
+
+        .card {
+            /* display: flex; */
+            position: absolute;
+            /* transform: translate(-50%, -50%); */
+            bottom: 5%;
+            left: -50%;
+            /* min-width: 25em; */
+            width: 35vw;
+            max-width: 27%;
+            height: 25%;
+            /* min-height: 15em; */
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 1em;
+            transition: all 0.5s ease-in-out;
+            border-radius: 2em;
+        }
+        
+        .card-visible {
+            left: 5vh;
+            /* display: block; */
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            width: 100%;
+            height: 100%;
+        }
+
+        .card-images {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            /* width: 100%; */
+            height: 100%;
+        }
+        
+        .authorPhoto {
+            /* position: absolute; */
+            border-radius: 50%;
+            object-fit: cover;
+            width: 16vh;
+            height: 16vh;
+            /* left: 20px; */
+            /* top: 20px; */
+        }
+
+        .flagPhoto{
+            /* position: absolute; */
+            /* left: 50px; */
+            /* top: 200px; */
+            width: 9vh;
+            height: 6vh;
+            object-fit: cover;   
+        }
+
+        .authorData {
+            /* position: absolute; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 58%;
+            height: 100%;
+            /* left: 12em; */
+            /* top: 0; */
+            text-align: center;
+            font-size: 1vw;
+        }
+
+        .authorName {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: rgb(255, 255, 255);
+            /* margin-bottom: 20px; */
+        }
+
+        .scholarLink {
+            text-decoration: none;
+        }
+
+        /* .authorAffiliation {
+            font-size: 1em;
+        } */
+
+        /* .authorh5Wrap {
+            margin: 0.5em;
+        } */
+
+
+        .ORCIDtext {
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .authorORCID {
+            display: inline-block;
+        }
+
+        .htext {
+            display: inline-block;
+            font-weight: bold;
+        }
+        .authorh {
+            display: inline-block;
+        }
+
+
+        
+    </style>
+</head>
+<body>
+     <header class="header">
+         <div class="header-inner">
+                <a class="a_title" href="https://linktr.ee/bioinformaticaperu" target="_blank">
+                    <img class="SPBPhoto" src="https://scontent.flim15-1.fna.fbcdn.net/v/t1.6435-9/167733528_133901418739618_7233742468266903680_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFTV-vMvTY9_OrchpstirWDKuncwP7t7IUq6dzA_u3shRVNbgm-tH5JAggg6yXVJgZNpLdnaa0kUPh1gX7WPCsx&_nc_ohc=AY61jX0QTsUQ7kNvgFlsAV4&_nc_ht=scontent.flim15-1.fna&oh=00_AYBUAMb28efXVSSUWydwEbAX5NaHr5cQCjMM32NWBRwKmQ&oe=66C2621B" alt="Sociedad Peruana de bioinformática y biología computacional">
+                    <span>V CONGRESO INTERNACIONAL DE LA SOCIEDAD PERUANA DE BIOINFORMÁTICA Y BIOLOGÍA COMPUTACIONAL</span>
+                </a>
+            </div>
+    </header>
+    <div style="display: flex;">
+        <svg id="mainNetwork"></svg>
+        <div class="containerPhoto">
+            <div class="authorInfo national">
+                <div class="box-p">
+                    <p style="font-weight: bold;">PONENTES NACIONALES</p>
+                </div>
+                <div class="authorPhotos"></div>
+            </div>
+            <div class="authorInfo international">
+                <div class="box-p">
+                    <p style="font-weight: bold;">PONENTES INTERNACIONALES</p>
+                </div>
+                <div class="authorPhotos"></div>
+            </div>  
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="card-images">
+                    <div class="authorPhotoWrap">
+                        <a class="scholarLink" target="_blank">
+                            <img class="authorPhoto">
+                    </div>
+                    <div class="flag">
+                        <img class="flagPhoto">
+                    </div>
+                </div>
+                <div class="authorData">
+                    <a class="scholarLink" target="_blank">
+                        <p class="authorName"></p>
+                    </a>
+                    <div class="authorAffiliation"></div>
+                    <div class="authorCountry"></div>
+                    <div class="authorh5Wrap">
+                        <p class="ORCIDtext">ORCID:&nbsp;</p><p class="authorORCID"></p>
+                    </div>
+                    <div class="authorh5Wrap">
+                        <p class="htext">h-index:&nbsp;</p><p class="authorh"></p>
+                    </div>
+                    
+                </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
